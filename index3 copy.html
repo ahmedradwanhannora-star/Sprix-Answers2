@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة إجابات الفصول والمراجعات - بودا الحكومة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #0ea5e9;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0b0f19;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --accent: #38bdf8;
+            --code-bg: #020617;
+            --code-text: #38bdf8;
+            --border-color: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* شاشة حماية كلمة السر */
+        #authScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-card h2 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        .auth-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-card input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text-main);
+            outline: none;
+            margin-bottom: 1rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .auth-card input:focus {
+            border-color: var(--primary);
+        }
+
+        .auth-card button {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .auth-card button:hover {
+            background: var(--primary-hover);
+        }
+
+        .auth-error {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 0.8rem;
+            display: none;
+        }
+
+        /* محتوى الموقع الأساسي */
+        #mainContent {
+            display: none;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo-area h1 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .logo-area p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-btn {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .contact-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .theme-toggle {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 1.5rem auto;
+            padding: 0 0.8rem;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1.2rem 0.8rem 2.8rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1.2rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .section-header {
+            padding: 1rem 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: rgba(99, 102, 241, 0.03);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 0.35rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .section-content {
+            padding: 1.2rem;
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .answer-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.8rem;
+            position: relative;
+        }
+
+        .answer-item p {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .answer-item pre {
+            font-family: 'Fira Code', monospace;
+            direction: ltr;
+            text-align: left;
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-width: 100%;
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .copy-single {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .copy-single:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* فوتر الموقع وقسم التواصل */
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 3rem;
+            box-shadow: var(--shadow);
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer-content h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-content p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .copyright {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <!-- شاشة إدخال كلمة السر -->
+    <div id="authScreen">
+        <div class="auth-card">
+            <h2>منصة إجابات الفصول</h2>
+            <p>أدخل كلمة المرور للوصول إلى المحتوى</p>
+            <input type="password" id="passwordInput" placeholder="اكتب كلمة السر هنا..." onkeypress="checkEnter(event)">
+            <button onclick="verifyPassword()">دخول</button>
+            <div id="authError" class="auth-error">كلمة المرور غير صحيحة، حاول مرة أخرى!</div>
+        </div>
+    </div>
+
+    <!-- المحتوى الأساسي للموقع -->
+    <div id="mainContent">
+        <header>
+            <div class="logo-area">
+                <h1>منصة إجابات الفصول</h1>
+                <p>إعداد المعلم: <strong>بودا الحكومة</strong></p>
+            </div>
+            <div class="header-actions">
+                <a href="#contactSection" class="contact-btn">
+                    <span>📞</span> تواصل معي
+                </a>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="theme-icon">🌙</span> الوضع الليلي
+                </button>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="ابحث عن الفصل، الكود، أو الحل المطلوب..." onkeyup="filterContent()">
+            </div>
+
+            <div id="contentContainer">
+                <!-- سيتم توليد المحتوى ديناميكياً -->
+            </div>
+        </div>
+
+        <!-- قسم التواصل معي والفوتر -->
+        <footer id="contactSection">
+            <div class="footer-content">
+                <h3>تواصل مع مطور المنصة</h3>
+                <p>لو عندك أي استفسار، مشكلة في الكود، أو اقتراح لتطوير المنصة، تقدر تتواصل معايا من خلال الوسائل دي:</p>
+                
+                <div class="social-links">
+                    <a href="https://wa.me/201234567890" target="_blank" class="social-link">💬 واتساب</a>
+                    <a href="https://t.me/your_username" target="_blank" class="social-link">✈️ تليجرام</a>
+                    <a href="mailto:your-email@example.com" class="social-link">📧 البريد الإلكتروني</a>
+                </div>
+
+                <div class="copyright">
+                    جميع الحقوق محفوظة © 2026 - تصميم وإدارة: <strong>بودا الحكومة</strong>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast">تم النسخ بنجاح!</div>
+
+    <script>
+        // كلمة السر الخاصة بك
+        const correctPassword = "123";
+
+        function verifyPassword() {
+            const enteredPass = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('authError');
+
+            if (enteredPass === correctPassword) {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                renderContent(courseData);
+            } else {
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                verifyPassword();
+            }
+        }
+
+        const courseData = [
+            {
+                title: "الفصل 43",
+                items: [
+                    "span{\n    color:orange;\n}",
+                    "span {\n  color: rgb(255, 100, 0);\n}",
+                    "span {\n  color:rgb(255,0,0);\n}",
+                    "150",
+                    "span {\n  color:rgb(255,255,0);\n}",
+                    "span {\n  color:rgb(255,100,0);\n}",
+                    "span{\n    color:#ff8c00;\n}",
+                    "#a260bf;",
+                    "opacity:0.3;",
+                    "opacity:0;",
+                    "opacity:0.5;"
+                ]
+            },
+            {
+                title: "مراجعة 43",
+                items: [
+                    "span {\n  color: green;\n}",
+                    "أصفر",
+                    "#ffff00",
+                    "opacity: 0.6;",
+                    "شفاف"
+                ]
+            },
+            {
+                title: "الفصل 44",
+                items: [
+                    "<h1>CAFE MENU</h1>\n<ul>\n    <li>About the Cafe</li>\n    <li>Menu</li>\n</ul>",
+                    "<header>\n\n</header>",
+                    "header{\n    background-color:rgb(255,255,180);\n}",
+                    "<div>\n\n</div>",
+                    "class=\"main\"",
+                    "<header>\n  <h1>CAFE MENU</h1>\n  <ul>\n    <li>About the Cafe</li>\n    <li>Menu</li>\n  </ul>\n</header>",
+                    "<div class=\"main\">\n  <h1>Menu List</h1>\n<ul>\n    <li>Donuts<img src=\"donuts.png\"></li>\n</ul>\n</div>",
+                    "<header>\n  <h1>CAFE MENU</h1>\n  <ul>\n    <li>About the Cafe</li>\n    <li>Menu</li>\n  </ul>\n</header>\n\n<div class=\"main\">\n  <h1>Menu List</h1>\n  <ul>\n    <li>Donuts\n    <br><img src=\"donuts.png\"></li>    \n  </ul>\n</div>",
+                    "alt=\"Donut image\"",
+                    "<header>\n  <h1>CAFE MENU</h1>\n  <ul>\n    <li>About the Cafe</li>\n    <li>Menu</li>\n  </ul>\n</header>\n\n<div class=\"main\">\n  <h1>Menu List</h1>\n  <ul>\n    <li>Donut<br><img src=\"donuts.png\" alt=\"Donut image\"></li>\n    <li>Cafe latte<br><img src=\"cafe_latte.png\" alt=\"Cafe latte image\"></li>\n  </ul>\n</div>",
+                    "<footer>\n    <ul>\n        <li>Access</li>\n        <li>Contact</li>\n    </ul>\n</footer>",
+                    "header {\n  background-color: rgb(255, 255, 180);\n}\nfooter{\n    background-color:#1e90ff;\n}"
+                ]
+            },
+            {
+                title: "مراجعة 44",
+                items: [
+                    "<img src=\"mountain_hut.png\" alt=\"Mountain hut photo\">",
+                    "<header>\n</header>",
+                    "<div class=\"mountains\">\n<h1>World Mountains</h1>\n<ul>\n<li>Mount Everest</li>\n<li>Mount McKinley</li>\n<li>Mount Kilimanjaro</li>\n</ul>\n</div>",
+                    "<footer>\n</footer>",
+                    "footer {\n  background-color: #e0a241;\n}"
+                ]
+            },
+            {
+                title: "الفصل 45",
+                items: [
+                    "h1 {\n  color:rgb(0,0,255);\n}",
+                    "h1 {\n  color:#0000ff;\n}",
+                    ".cody:hover  {\n   opacity: 0.5;\n}",
+                    "<header>\n\n</header>",
+                    "<div>\n\n</div>",
+                    "<footer>\n\n</footer>"
+                ]
+            },
+            {
+                title: "مراجعة 45",
+                items: [
+                    "أصفر",
+                    "#ffff00",
+                    "شفاف",
+                    "<header>\n</header>",
+                    "<div class=\"mountains\">",
+                    "footer {\n  background-color: #e0a241;\n}",
+                    "<footer>\n</footer>"
+                ]
+            },
+            {
+                title: "الفصل 46",
+                items: [
+                    "const numList = [128, 254, 458, 547, 125, 305, 581, 12, 783, 429];",
+                    "for (const num of numList) {\n  if(num % 7 == 0){\n  console.log(num)\n  }\n}",
+                    "let count = 0;\nfor (let i = 0; i <= 999; i++) {\nif(i % 7 == 0){\ncount++\n}\n}\nconsole.log(count);",
+                    "function checkWinningNum(numList){\n    for(const num of numList){\n        if(num % 7 == 0){\n            console.log(num)\n        }\n    }\n}",
+                    "const myNumList = [128, 254, 458, 547, 125, 305, 581, 12, 783, 429];\ncheckWinningNum(myNumList);"
+                ]
+            },
+            {
+                title: "مراجعة 46",
+                items: [
+                    "3",
+                    "const numList = [2, 4, 6, 8];\nfor (const num of numList) {\n  console.log(num);\n}",
+                    "من بين القيم من 0 إلى 6، عدد القيم التي تقبل القسمة على 2",
+                    "for (let i = 1; i < 5; i++) {\n  if (i % 3 == 0) {\n    console.log(i);\n  }\n}",
+                    "10"
+                ]
+            },
+            {title: "الفصل 47",
+                items: [
+                    "const target = 1;\n\nswitch(target){\n    case 4:\n        console.log(\"Video game Get\");\n        break;\n    case 8:\n        console.log(\"Video game Get\");\n        break;\n    case 1:\n        console.log(\"Candy Assortment Get\");\n        break;\n    case 7:\n        console.log(\"Candy Assortment Get\");\n        break;\n    default:\n        console.log(\"Sticker Get\");\n        break;\n}",
+                    "const num = 2;\n\nswitch(num){\n    case 1:\n        console.log(\"Student \" + num + \" is in Group A\");\n        break;\n    case 2:\n        console.log(\"Student \" + num + \" is in Group B\");\n        break;\n    case 3:\n        console.log(\"Student \" + num + \" is in Group C\");\n        break;\n    case 4:\n        console.log(\"Student \" + num + \" is in Group D\");\n        break;\n}",
+                    "switch",
+                    "num%4",
+                    "let seat = \"sold out\";\nif (!(seat == \"available\")) {\n  console.log(\"It's sold out\");\n}"
+                ]
+            },
+            {
+                title: "مراجعة 47",
+                items: [
+                    "const weather = \"sunny\";\nswitch (weather) {\n  case \"sunny\":\n    console.log(\"Let's go shopping\");\n    break;\n  case \"cloudy\":\n    console.log(\"Let's go shopping\");\n    break;\n  case \"rainy\":\n    console.log(\"Let's stay home\");\n    break;\n}",
+                    "strawberry orange apple",
+                    "for (let i = 1; i <= 10; i++) {\n  switch (i % 3) {\n    case 0:\n      console.log(\"Student \" + i + \" is in Group C\");\n      break;\n    case 1:\n      console.log(\"Student \" + i + \" is in Group A\");\n      break;\n    case 2:\n      console.log(\"Student \" + i + \" is in Group B\");\n      break;\n  }\n}",
+                    "No output"
+                ]
+            },
+            {
+                title: "الفصل 48",
+                items: [
+                    "const num of numList",
+                    "let count = 0;\nfor (let i = 0; i <= 999; i++) {\nif(i % 7 == 0){\n    count++\n}\n}\nconsole.log(count);",
+                    "function",
+                    "checkWinningNum",
+                    "numList",
+                    "let seat = \"sold out\";\nif (!(seat == \"available\")) {\n  console.log(\"Sold out\");\n}"
+                ]
+            },
+            {
+                title: "مراجعة 48",
+                items: [
+                    "3",
+                    "const numList = [2, 4, 6, 8];\nfor (const num of numList) {\n  console.log(num);\n}",
+                    "عدد القيم من 0 إلى 6 التي تقبل القسمة على 2",
+                    "10",
+                    "No output"
+                ]
+            },
+            {
+                title: "الفصل 49",
+                items: [
+                    "let distance = 0;",
+                    "let distance = 0;\nwhile(distance < 100){\n    distance = distance + 6;\n}",
+                    "distance",
+                    "while",
+                    "money < 50000",
+                    "year++",
+                    "let year = 2026;\nlet tournamentCount = 0;\n\nwhile(year <= 2100){\n    tournamentCount++;\n    year = year + 4;\n}\nconsole.log(\"There will be \" + tournamentCount + \" World Cup tournaments by the year 2100\");"
+                ]
+            },
+            {
+                title: "مراجعة 49",
+                items: [
+                    "num < 100",
+                    "3 6 9",
+                    "year % 4 == 0",
+                    "Count: 0 Count: 1 Count: 3 Count: 4"
+                ]
+            },
+            {
+                title: "الفصل 50",
+                items: [
+                    "const distanceList = [4500, 5600, 2400, 3800, 4200, 6700, 3400];\nconst stepCount = distanceList[0] / 0.7;\nconsole.log(stepCount);",
+                    "const stepCount = distanceList[5] / 0.7;",
+                    "for",
+                    "const distance of distanceList",
+                    "sum = sum + distance",
+                    "console.log(sum)",
+                    "sum / distanceList.length"
+                ]
+            },
+            {
+                title: "مراجعة 50",
+                items: [
+                    "55",
+                    "const score of scoreList",
+                    "const scoreList = [40, 55, 67, 52, 120];\nlet sum = 0;\nfor (const score of scoreList) {\n  sum = sum + score;\n}\nconsole.log(sum);",
+                    "4",
+                    "sum / scoreList.length"
+                ]
+            },
+            {
+                title: "الفصل 51",
+                items: [
+                    "while",
+                    "distance < 100",
+                    "distance = distance + 6",
+                    "let money = 20000;\nlet year = 0;\nwhile (money < 50000) {\n  year++;\n  if(year % 2 == 0){\n      money = money * 1.2;\n  }\n  console.log(money);\n}\nconsole.log(\"It will exceed 50000 codycoins in \" + year + \" years\");",
+                    "const stepCount = distanceList[5] / 0.7",
+                    "for",
+                    "const distance of distanceList"
+                ]
+            },
+            {
+                title: "مراجعة 51",
+                items: [
+                    "year % 4 == 0",
+                    "Count: 0 Count: 1 Count: 3 Count: 4",
+                    "const score of scoreList",
+                    "sum / scoreList.length"
+                ]
+            },
+            {title: "الفصل 52",
+                items: [
+                    "console.log(wordList.includes(\"dag\"));",
+                    "console.log(wordList.includes(\"bell\"));",
+                    "console.log(wordList.indexOf(\"sun\"));",
+                    "console.log(wordList.indexOf(\"pen\"));",
+                    "nameList.sort();",
+                    "const nameList = [\"Mia\", \"Noah\", \"Liam\", \"David\", \"Grace\"];\n\nnameList.sort();\nconsole.log(nameList);",
+                    "rankingList.reverse();",
+                    "const rankingList = [\"Mason\", \"Isabella\", \"William\", \"Charlotte\", \"Rick\"];\n\nrankingList.reverse();\nconsole.log(rankingList);"
+                ]
+            },
+            {
+                title: "مراجعة 52",
+                items: [
+                    "false",
+                    "1",
+                    "fruitList.sort();",
+                    "numList.reverse();",
+                    "let guestList = [\"Johnson\", \"Smith\", \"Brown\", \"Davis\", \"Wilson\"];\nconsole.log(guestList.includes(\"Wilson\"));",
+                    "guestList.sort();"
+                ]
+            },
+            {
+                title: "الفصل 53",
+                items: [
+                    "sandwichIngredients.push(\"mayo\");",
+                    "sandwichIngredients.push(\"mayo\", \"bacon\");",
+                    "sandwichIngredients.pop();",
+                    "sandwichIngredients.pop();",
+                    "burgerIngredients.pop();",
+                    "burgerIngredients.shift();",
+                    "burgerIngredients.shift();",
+                    "rankingList.pop();",
+                    "rankingList.unshift(\"Rick\");",
+                    "rankingList.unshift(\"Cody\");"
+                ]
+            },
+            {
+                title: "مراجعة 53",
+                items: [
+                    "letterList.push(\"dog\");",
+                    "letterList.pop();",
+                    "cat,bird",
+                    "letterList.unshift(\"diary\");",
+                    "let letterList = [\"p\", \"r\", \"o\", \"g\", \"r\", \"a\", \"m\", \"y\"];\nletterList.pop();\nconsole.log(letterList);",
+                    "let colorList = [\"red\", \"blue\", \"yellow\"];\ncolorList.unshift(\"green\");\nconsole.log(colorList);"
+                ]
+            },
+            {
+                title: "الفصل 54",
+                items: [
+                    "console.log(wordList.includes(\"bell\"));",
+                    "console.log(wordList.indexOf(\"pen\"));",
+                    "nameList.sort();",
+                    "const rankingList = [\"James\", \"Luna\", \"Ethan\", \"Ava\", \"Rick\"];\n\nrankingList.reverse();\nconsole.log(rankingList);",
+                    "sandwichIngredients.push(\n  \"mayo\"\n);",
+                    "ingredientsList.pop();",
+                    "burgerIngredients.shift();",
+                    "burgerIngredients.unshift(\"mushroom\");"
+                ]
+            },
+            {
+                title: "مراجعة 54",
+                items: [
+                    "numList.reverse();",
+                    "1",
+                    "orange,banana",
+                    "letterList.push(\"apple\");",
+                    "let guestList = [\"Johnson\", \"Smith\", \"Brown\", \"Davis\", \"Wilson\"];\nconsole.log(guestList.includes(\"Wilson\"));",
+                    "guestList.sort();",
+                    "letterList.pop();",
+                    "colorList.unshift(\"green\");"
+                ]
+            }
+        ];
+
+        function renderContent(data) {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = '';
+
+            data.forEach((section, index) => {
+                let itemsHTML = '';
+                section.items.forEach((item, itemIndex) => {
+                    itemsHTML += `
+                        <div class="answer-item">
+                            <button class="copy-single" onclick="copyText(this, \`${escapeHtml(item)}\`)">نسخ</button>
+                            <p>السؤال أو الحل رقم (${itemIndex + 1}):</p>
+                            <pre><code>${escapeHtml(item)}</code></pre>
+                        </div>
+                    `;
+                });
+
+                const card = document.createElement('div');
+                card.className = 'section-card';
+                card.innerHTML = `
+                    <div class="section-header">
+                        <span class="section-title">${section.title}</span>
+                        <button class="btn" onclick="copySection(${index})">نسخ الكل</button>
+                    </div>
+                    <div class="section-content">
+                        ${itemsHTML}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function filterContent() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = courseData.map(section => {
+                const matchedItems = section.items.filter(item => item.toLowerCase().includes(query));
+                if (section.title.toLowerCase().includes(query) || matchedItems.length > 0) {
+                    return {
+                        title: section.title,
+                        items: section.title.toLowerCase().includes(query) ? section.items : matchedItems
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            renderContent(filtered);
+        }
+
+        function copyText(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("تم النسخ بنجاح!");
+            });
+        }
+
+        function copySection(index) {
+    const section = courseData[index];
+    const fullText = section.title + "\n\n" + section.items.join("\n\n-------------------\n\n");
+    navigator.clipboard.writeText(fullText).then(() => {
+        showToast(`تم نسخ كل إجابات "${section.title}"`);
+    });
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2000);
+}
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '🌙';
+            }
+        }</script>
+</body>
+</html>
